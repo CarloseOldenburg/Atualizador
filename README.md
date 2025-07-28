@@ -1,10 +1,3 @@
-Perfeito! 🚀  
-Segue abaixo tudo que você pediu:
-
----
-
-# README.md – Rollout VSFood/iFood - Python CLI
-
 ## Visão Geral
 
 Este projeto é um **instalador/atualizador interativo para módulos do ecossistema VSFood/iFood**.  
