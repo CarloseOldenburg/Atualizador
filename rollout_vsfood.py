@@ -192,7 +192,7 @@ class RolloutApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Label("Rollout VSFood - Totem TX", style="bold green")
+        yield Label("Rollout VSFood - Totem TX")  # Removi o 'style'!
         yield Static("Escolha o perfil do seu totem e as versões desejadas:", id="desc")
         yield Select(id="profile", options=[
             ("iFood", "ifood"),
