@@ -192,7 +192,7 @@ class RolloutApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Label("Rollout VSFood - Totem TX")  # Removi o 'style'!
+        yield Label("Rollout VSFood - Totem TX")  # Sem argumento style!
         yield Static("Escolha o perfil do seu totem e as versões desejadas:", id="desc")
         yield Select(id="profile", options=[
             ("iFood", "ifood"),
@@ -268,7 +268,7 @@ class RolloutApp(App):
 
     def ask_select(self, msg, options):
         console.print(f"[cyan]{msg}")
-        for i,opt in enumerate(options):
+        for i, opt in enumerate(options):
             print(f"  [{i+1}] {opt}")
         while True:
             v = input("Digite o número da opção: ")
