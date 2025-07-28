@@ -5,7 +5,7 @@ import sys, os, subprocess, shutil, datetime, time
 try:
     from rich.console import Console
     from textual.app import App, ComposeResult
-    from textual.widgets import Button, Header, Footer, Static, Select, Label
+    from textual.widgets import Button, Header, Footer, Static, Select, Label, TextLog
 except ImportError:
     print("\n[ERRO] Dependências Textual/Rich não foram encontradas (python3 -m pip install rich textual requests)")
     print("Por favor, rode o comando de instalação sugerido (bootstrap.sh) ou peça ajuda ao suporte.")
@@ -14,6 +14,7 @@ except ImportError:
 LOG_FILE = "install_log.txt"
 BACKUP_DIR = "backup-vsfood"
 console = Console()
+_GLOBAL_APP = None  # Usado para escrever no log do TextLog
 
 MODS = {
     "vs-os-interface": {
@@ -45,6 +46,12 @@ def log(msg):
     with open(LOG_FILE, "a") as f:
         f.write(msg+'\n')
     console.print(f"[bright_black][rollout][/bright_black] [green]{msg}[/green]")
+    if _GLOBAL_APP is not None:
+        try:
+            log_widget = _GLOBAL_APP.query_one("#progress", TextLog)
+            log_widget.write(msg)
+        except Exception:
+            pass
 
 def run(cmd, fail_ok=False):
     log(f"$ {cmd}")
@@ -61,6 +68,7 @@ def check_root():
         sys.exit(1)
 
 def backup():
+    log("Iniciando backup da pasta /opt/videosoft (se existir)")
     if not os.path.exists("/opt/videosoft"):
         log("Pasta /opt/videosoft não existe, backup não realizado.")
         return
@@ -74,7 +82,7 @@ def backup():
 
 def sleep_count(count=5):
     for i in reversed(range(count+1)):
-        console.print(f"[yellow]Reiniciando em {i}...[/yellow]")
+        log(f"Reiniciando em {i}...")
         time.sleep(1)
 
 def limpar_token():
@@ -192,7 +200,7 @@ class RolloutApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Label("Rollout VSFood - Totem TX")  # Sem argumento style!
+        yield Label("Rollout VSFood - Totem TX")
         yield Static("Escolha o perfil do seu totem e as versões desejadas:", id="desc")
         yield Select(id="profile", options=[
             ("iFood", "ifood"),
@@ -204,7 +212,12 @@ class RolloutApp(App):
         yield Button("Backup Manual", id="backup", variant="warning")
         yield Button("Ver Logs", id="logs", variant="primary")
         yield Button("Sair", id="sair", variant="error")
+        yield TextLog(id="progress", highlight=True, max_lines=25)
         yield Footer()
+
+    def on_mount(self):
+        global _GLOBAL_APP
+        _GLOBAL_APP = self  # permite log no TextLog globalmente!
 
     def on_button_pressed(self, msg: Button.Pressed) -> None:
         if msg.button.id == "rollout":
@@ -225,7 +238,7 @@ class RolloutApp(App):
             v = self.escolher_versao_textual(m)
             arq = baixar_modulo(m, v)
             instalar_deb(arq)
-            self.console.print(f"Módulo {m} ({v}) atualizado!")
+            log(f"Módulo {m} ({v}) atualizado!")
         elif msg.button.id == "url":
             tipo = self.escolher_tipo_url()
             versao = self.escolher_versao_url()
@@ -233,7 +246,7 @@ class RolloutApp(App):
             alterar_url(tipo, versao, homolog)
             limpar_cache()
             limpar_token()
-            self.console.print("[green]URL atualizada e limpeza concluída!")
+            log("URL atualizada e limpeza concluída!")
         elif msg.button.id == "backup":
             backup()
         elif msg.button.id == "logs":
@@ -267,7 +280,7 @@ class RolloutApp(App):
         return (idx == 0)
 
     def ask_select(self, msg, options):
-        console.print(f"[cyan]{msg}")
+        log(f"\n{msg}")
         for i, opt in enumerate(options):
             print(f"  [{i+1}] {opt}")
         while True:
@@ -276,7 +289,7 @@ class RolloutApp(App):
                 v = int(v)
                 if 1 <= v <= len(options):
                     return v-1
-            except:
+            except Exception:
                 pass
             print("Opção inválida!")
 
