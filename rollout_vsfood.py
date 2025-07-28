@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 
-import os, sys, subprocess, shutil, datetime, time
-from rich.console import Console
-from textual.app import App, ComposeResult
-from textual.widgets import Button, Header, Footer, Static, Select, Label, Input, TextLog
-from textual.containers import Horizontal, Vertical
+import sys, os, subprocess, shutil, datetime, time
+
+try:
+    from rich.console import Console
+    from textual.app import App, ComposeResult
+    from textual.widgets import Button, Header, Footer, Static, Select, Label
+except ImportError:
+    print("\n[ERRO] Dependências Textual/Rich não foram encontradas (python3 -m pip install rich textual requests)")
+    print("Por favor, rode o comando de instalação sugerido (bootstrap.sh) ou peça ajuda ao suporte.")
+    sys.exit(1)
 
 LOG_FILE = "install_log.txt"
 BACKUP_DIR = "backup-vsfood"
@@ -96,7 +101,7 @@ def instalar_launcher():
     log("Instalando vsd-launcher (curl preferencial)...")
     try:
         run("curl -sSL -o vsd-launcher https://raw.githubusercontent.com/CarloseOldenburg/Ferramentas/refs/heads/main/VSD-Launcher")
-    except:
+    except Exception:
         log("Falha no curl, tentando com wget...")
         run("wget https://raw.githubusercontent.com/CarloseOldenburg/Ferramentas/refs/heads/main/VSD-Launcher -O vsd-launcher")
     run("sudo chmod 755 vsd-launcher")
@@ -117,7 +122,7 @@ def baixar_modulo(nome_modulo, versao):
     log(f"Baixando {nome_modulo} versão {versao}...")
     try:
         run(f"curl -sSL -o '{arquivo}' '{url}'")
-    except:
+    except Exception:
         log("curl falhou, tentando wget...")
         run(f"wget --inet4-only '{url}' -O '{arquivo}'")
     return arquivo
@@ -138,7 +143,6 @@ def health_check():
     log("Health check encerrado.")
 
 def alterar_url(tipo="food", versao="3", homolog=False):
-    """Altera a URL do vs-food.sh conforme template do shell"""
     url_new = ""
     if tipo == "food":
         if versao == "2":
@@ -165,7 +169,7 @@ def rollout_ifood(versoes):
     for modulo, ver in versoes.items():
         arq = baixar_modulo(modulo, ver)
         instalar_deb(arq)
-    alterar_url(tipo="food", versao="3") # (ou '2' conforme input)
+    alterar_url(tipo="food", versao="3")
     health_check()
     reboot()
 
@@ -182,8 +186,6 @@ def rollout_legado(versoes):
     alterar_url(tipo="food", versao="3")
     health_check()
     reboot()
-
-### TEXTUAL APP ###
 
 class RolloutApp(App):
     CSS_PATH = None
@@ -207,7 +209,6 @@ class RolloutApp(App):
     def on_button_pressed(self, msg: Button.Pressed) -> None:
         if msg.button.id == "rollout":
             profile = self.query_one("#profile", Select).value
-            # Escolha de versões
             versoes = {}
             if profile == "ifood":
                 modlist = ["vs-os-interface", "vsd-payment", "pinpad-server"]
