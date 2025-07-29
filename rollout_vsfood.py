@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import site
-site.ENABLE_USER_SITE = False  # <-- Adicionado para evitar conflitos com ~/.local
+site.ENABLE_USER_SITE = False  # <- ESSENCIAL: Garante dependências só globais
 
 import sys, os, subprocess, shutil, datetime, time
 
