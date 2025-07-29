@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# bash -c "$(curl -sSL https://raw.githubusercontent.com/CarloseOldenburg/rollout-vsfood/refs/heads/main/bootstrap.sh)"
+
 echo "→ Limpando bibliotecas duplicadas (user+root)"
 python3 -m pip uninstall -y rich textual requests || true
 sudo python3 -m pip uninstall -y rich textual requests || true
