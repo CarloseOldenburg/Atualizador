@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import site
+site.ENABLE_USER_SITE = False  # <-- Adicionado para evitar conflitos com ~/.local
+
 import sys, os, subprocess, shutil, datetime, time
 
 try:
@@ -217,7 +220,7 @@ class RolloutApp(App):
 
     def on_mount(self):
         global _GLOBAL_APP
-        _GLOBAL_APP = self  # permite log no TextLog globalmente!
+        _GLOBAL_APP = self
 
     def on_button_pressed(self, msg: Button.Pressed) -> None:
         if msg.button.id == "rollout":
